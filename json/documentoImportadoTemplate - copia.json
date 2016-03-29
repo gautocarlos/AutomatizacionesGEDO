@@ -1,0 +1,12 @@
+{
+  "documentoGEDO": {
+    "acronimo": "ITAUT",
+    "referencia": "referencia del documento",
+    "rutaImportado": "C:/CapturasWatir/GEDO_11Mar2016114314.png",
+    "ffcc": {
+      "0": "texto del Campo1",
+      "1": "texto del Campo2",
+      "2": "texto del Campo3"
+    }
+  }
+}

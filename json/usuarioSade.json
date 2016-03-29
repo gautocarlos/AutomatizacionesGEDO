@@ -1,0 +1,9 @@
+{
+  "login": {
+    "usuario": {
+      "nombreUsuario": "CCARLOS",
+      "password": "123456"
+    },
+    "url": { "urlModulo": "http://gedo-test.gcaba.everis.int/gedo-web/" }
+  }
+}

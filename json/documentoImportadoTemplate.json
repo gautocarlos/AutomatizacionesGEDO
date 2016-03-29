@@ -1,0 +1,13 @@
+{
+  "documentoGEDO": {
+    "acronimo": "ITEAU",
+    "referencia": "referencia del documento",
+    "rutaImportado": "C:/CapturasWatir/GEDO_11Mar2016114314.png",
+    "rutaEmbebido": "C:/Users/cargauto/Downloads/AT/000_Embebido.png",
+    "ffcc": {
+      "0": "texto del Campo1",
+      "1": "texto del Campo2",
+      "2": "texto del Campo3"
+    }
+  }
+}
