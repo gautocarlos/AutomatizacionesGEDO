@@ -5,5 +5,16 @@
       "password": "123456"
     },
     "url": { "urlModulo": "http://gedo-test.gcaba.everis.int/gedo-web/" }
+  },
+  "configuraciones": {
+    "rutas": {
+      "rutaScreenshots": "C:/Users/cargauto/WatirOutput/Screenshots/",
+      "rutaLogs": "C:/Users/cargauto/WatirOutput/Logs/",
+      "rutaJSON": "C:/Users/cargauto/Documents/GitHub/AutomatizacionesGEDO/json/"
+    },
+    "urls": {
+      "rutaGEDO": "http://gedo-test.gcaba.everis.int/gedo-web/",
+      "rutaEE": "http://ee-test.gcaba.everis.int/expedientes-web/"
+    }
   }
 }
