@@ -1,7 +1,7 @@
 # Clase que se utiliza para dar de alta un nuevo documento GEDO del tipo libre#
   require 'watir-webdriver'
   require 'logger'
-  require '../0000_Constantes.rb'
+  require '../constantes.rb'
   class Documento
     attr_accessor
       :browser

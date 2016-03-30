@@ -3,7 +3,7 @@
   require 'watir-webdriver'
   require 'logger'
   #Levantar las constantes declaradas
-  require '../0000_Constantes.rb'
+  require '../constantes.rb'
   # Genera los dorectorios de logs
   require '../0000_Directorios_GEDO.rb'
   require './login.rb'

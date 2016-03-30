@@ -1,6 +1,6 @@
 # Clase que se utiliza para dar de alta un nuevo documento GEDO del tipo libre#
   require 'watir-webdriver'
-  require '../0000_Constantes.rb'
+  require '../constantes.rb'
   require './documento.rb'
 
   class DocumentoImportadoTemplate < Documento
