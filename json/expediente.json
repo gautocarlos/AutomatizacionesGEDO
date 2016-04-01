@@ -3,6 +3,9 @@
     "trata": "PRUEBACANES",
     "motivoInterno": "Motivo interno de la caratula",
     "motivoExterno": "Motivo externo de la caratula",
-    "descAdicional": "Descripción adicional"
+    "descAdicional": "Descripción adicional",
+    "ffcc": {
+      "0": "198ABC"
+    }
   }
 }

@@ -276,7 +276,8 @@
       campos = self.getBrowser().text_fields(:class => 'z-textbox')  
       campos.each do |i|
         indice = indice + 1
-        if i.visible?
+        #if i.visible?
+        if (i.visible? && !i.readonly?)
           if indice > POSICIONREFERENCIA
             #i.set TEXTOCAMPOSFC
             #puts "0---------------"
