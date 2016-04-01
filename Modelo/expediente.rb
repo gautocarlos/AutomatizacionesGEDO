@@ -12,6 +12,11 @@
       :motivoExterno
       :descAdicional
       :ffcc
+      :tipoActuacion
+      :anio
+      :numero
+      :reparticionActuacion
+      :reparticionUsuario
     # constructor
     def initialize(browser)
       #@browser = browser
@@ -51,6 +56,26 @@
     def getFFCC
       return @ffcc
     end
+    #
+    def getTipoActuacion()
+      return @tipoActuacion
+    end
+    #
+    def getAnio()
+      return @anio
+    end
+    #
+    def getNumero()
+      return @numero
+    end
+    #
+    def getReparticionActuacion()
+      return @reparticionActuacion
+    end
+    # 
+    def getReparticionUsuario()
+      return @reparticionUsuario
+    end
     # Setters
     def setBrowser(browser)
       @browser = browser
@@ -78,8 +103,29 @@
     def setFFCC(ffcc)
       @ffcc = ffcc
     end
-    # Métodos
-    def parseJSON
+    #
+    def setTipoActuacion(tipoActuacion)
+      @tipoActuacion = tipoActuacion
+    end
+    #
+    def setAnio(anio)
+      @anio = anio
+    end
+    #
+    def setNumero(numero)
+      @numero = numero
+    end
+    #
+    def setReparticionActuacion(reparticionActuacion)
+      @reparticionActuacion = reparticionActuacion
+    end
+    # 
+    def setReparticionUsuario(reparticionUsuario)
+      @reparticionUsuario = reparticionUsuario
+    end
+    #
+    # MÃ©todos
+    def parseJSON()
       archivoDatosEE = open("../JSON/expediente.json")
       datosEE = archivoDatosEE.read
       datosEEParseo = JSON.parse(datosEE)
@@ -111,7 +157,7 @@
       end
     end
 
-    # Realiza una caratulación interna de expediente
+    # Realiza una caratulaciÃ³n interna de expediente
     def caratularInterno()
       self.iniciarCaratulacionInterna()
       self.completarDatosGenericos()
@@ -128,7 +174,7 @@
       #end
       self.terminarCaratulacion()
     end
-    # Realiza una caratulación interna de expediente
+    # Realiza una caratulaciÃ³n interna de expediente
     def caratularExterno()
       self.getBrowser().divs(:class => 'z-toolbarbutton-cnt')[2].click
 
@@ -136,6 +182,10 @@
     #
     def iniciarCaratulacionInterna()
       self.getBrowser().divs(:class => 'z-toolbarbutton-cnt')[1].click 
+    end
+    #
+    def iniciarCaratulacionExterna()
+      self.getBrowser().divs(:class => 'z-toolbarbutton-cnt')[2].click 
     end
     # 
     def completarDatosGenericos()
@@ -147,6 +197,10 @@
       self.getBrowser().text_fields(:class => 'z-textbox')[2].set self.getDescAdicional()
       # Selecciona la trata
       #self.getBrowser().element(:class => 'z-modal-mask').click
+    end
+    # 
+    def completarDatosPersonaFisica()
+
     end
     #
     def caratular()
@@ -172,6 +226,42 @@
     def terminarCaratulacion()
       #puts "----terminarCaratulacion()----"
       self.getBrowser().element(:class => 'z-button-cm').click
+    end
+    # Deprecar?
+    def consultarEE()
+      self.presionarTabConsulta()
+
+    end
+    #
+    def consultaExpedientesPorNumeroSADE(anio, numero, reparticionUsuario)
+      self.presionarTabConsulta()
+      self.presionarBotonConsultaExpedientesPorNumeroSADE()
+      self.cargarNumeroSADEExpedienteConsulta(anio, numero, reparticionUsuario)
+      self.presionarBotonBuscarExpediente()
+    end
+    #
+    def presionarTabConsulta()
+      botonera = self.getBrowser().spans(:class => 'z-tab-text') 
+      botonera.each do |boton|
+        if (boton.text == "Consultas")
+          boton.click
+        end
+      end
+    end
+    #
+    def presionarBotonConsultaExpedientesPorNumeroSADE()
+      self.getBrowser().button(:class => 'z-menu-item-btn').click
+    end
+    #
+    def presionarBotonBuscarExpediente()
+      self.getBrowser().spans(:class => 'z-button')[1].click()
+    end
+    #
+    def cargarNumeroSADEExpedienteConsulta(anio, numero, reparticionUsuario)
+      self.getBrowser().text_fields(:class => 'z-intbox')[0].set anio
+      self.getBrowser().text_fields(:class => 'z-intbox')[1].set numero
+      #self.getBrowser().text_fields(:class => 'z-bandbox-btn')[1].set numero
+      self.getBrowser().text_fields(:class => 'z-bandbox-inp')[0].set reparticionUsuario
     end
   end
 ###############################################################################
