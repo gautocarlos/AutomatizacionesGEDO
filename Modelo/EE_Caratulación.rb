@@ -19,7 +19,34 @@
   #expediente.caratularInterno()
   ##########
   expediente.consultaExpedientesPorNumeroSADE("2016", "00086369", "CHARLY")
+  expediente.tramitarEjecutarTarea()
   ##########
+  expediente.tramitarAdquirirTarea()
+
+  imagenes = browser.images
+  imagenes.each do |imagen|
+    if imagen.title == "Ver expediente"
+      imagen.click
+    end
+  end
+
+      botonera = browser.spans(:class => 'z-label') 
+      botonera.each do |boton|
+        if (boton.title == "Tramitar Expediente")
+          boton.click
+        end
+      end
+
+      botonera = self.getBrowser().lis(:class => 'z-menu-item')
+      botonera.each do |boton|
+        if (boton.title == "Tramitar Expediente")
+          boton.click
+        end
+      end
+
+      browser.lis(:class => 'z-menu-item')[8].click
+
+
 
   browser.spans(:class => 'z-tab-text').find(browser.span(:class => 'z-tab-text').text == "Consultas")
   browser.spans(:class => 'z-button')[1].click()

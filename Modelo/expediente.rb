@@ -263,5 +263,33 @@
       #self.getBrowser().text_fields(:class => 'z-bandbox-btn')[1].set numero
       self.getBrowser().text_fields(:class => 'z-bandbox-inp')[0].set reparticionUsuario
     end
+    #
+    def visualizarExpediente()
+      imagenes = self.getBrowser().images
+      imagenes.each do |imagen|
+        if imagen.title == "Ver expediente"
+          imagen.click
+        end
+      end
+    end
+    #
+    def consultasPresionarTramitar()
+      botonera = self.getBrowser().spans(:class => 'z-label') 
+      botonera.each do |boton|
+        if (boton.title == "Tramitar Expediente")
+          boton.click
+        end
+      end
+    end
+    #
+    def tramitarEjecutarTarea()
+      consultasPresionarTramitar()
+      self.getBrowser().lis(:class => 'z-menu-item')[8].click
+    end
+    #
+    def tramitarAdquirirTarea()
+      consultasPresionarTramitar()
+      self.getBrowser().lis(:class => 'z-menu-item')[9].click
+    end
   end
 ###############################################################################
