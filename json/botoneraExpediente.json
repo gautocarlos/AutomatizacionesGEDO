@@ -1,0 +1,42 @@
+{
+  "botonera": {
+    "tabDocumento": {
+      "VincularDocumento": "VincularDocumento.png",
+      "Subsanar_documento": "Subsanar_documento.png",
+      "IniciarDocumentoGedo": "IniciarDocumentoGedo.png",
+      "NotificarTAD": "NotificarTAD.png"
+    },
+    "tabDocumentosDeTrabajo": {
+      "ArchivosDeTrabajo": "ArchivosDeTrabajo.png"
+    },
+    "tabAsociarExpediente": {
+      "BuscarExpediente": "BuscarExpediente.png"
+    },
+    "tabTramitacionConjunta": {
+      "BuscarExpediente": "BuscarExpediente.png",
+      "ConfirmarTramitacionConjunta": "ConfirmarTramitacionConjunta.png",
+      "DesvincularTramitacionConjunta": "DesvincularTramitacionConjunta.png"
+    },
+    "tabFusion": {
+      "BuscarExpediente": "BuscarExpediente.png",
+      "ConfirmarFusion": "ConfirmarFusion.png"
+    },
+    "tabHistorialDePases": {
+    },
+    "tabDatosDeLaCaratula": {
+      "Modificar": "Modificar.png",
+      "Guardar": "Guardar.png",
+      "BotonCancelar": "BotonCancelar.png",
+      "DatosPropiosDelExpediente": "DatosPropiosDelExpediente.png"
+    },
+    "transversal": {
+      "SalirSinPase": "SalirSinPase.png",
+      "RealizarPase": "RealizarPase.png",
+      "RealizarPaseMultiple": "RealizarPaseMultiple.png",
+      "reservar": "reservar.png",
+      "GenerarCopia": "GenerarCopia.png",
+      "NotificarExpedienteTAD": "NotificarExpedienteTAD.png",
+      "Cancelar": "Cancelar.png"
+    }    
+  }
+}

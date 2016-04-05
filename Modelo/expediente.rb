@@ -17,6 +17,8 @@
       :numero
       :reparticionActuacion
       :reparticionUsuario
+      :botoneraEEParseo
+      :datosExpediente
     # constructor
     def initialize(browser)
       #@browser = browser
@@ -29,6 +31,10 @@
       parseJSON()
     end
     # Getters
+    def getDatosExpediente()
+      return @datosExpediente
+    end
+    #
     def getBrowser()
       return @browser
     end
@@ -76,7 +82,15 @@
     def getReparticionUsuario()
       return @reparticionUsuario
     end
+    # 
+    def getBotoneraEEParseo()
+      return @botoneraEEParseo 
+    end
     # Setters
+    def setDatosExpediente(datosExpediente)
+      @datosExpediente = datosExpediente
+    end
+
     def setBrowser(browser)
       @browser = browser
     end
@@ -124,11 +138,19 @@
       @reparticionUsuario = reparticionUsuario
     end
     #
+    def setBotoneraEEParseo (botoneraEEParseo)
+      @botoneraEEParseo = botoneraEEParseo
+    end
     # Métodos
     def parseJSON()
       archivoDatosEE = open("../JSON/expediente.json")
       datosEE = archivoDatosEE.read
       datosEEParseo = JSON.parse(datosEE)
+      # TO DO
+      # Se debe reemplazar esta implementación para que cada método acceda directo al contenido del JSON sin guardarlo en variables
+      self.setDatosExpediente(datosEEParseo)
+      # Se debe reemplazar esta implementación para que cada método acceda directo al contenido del JSON sin guardarlo en variables
+      # TO DO
       self.setTrata(datosEEParseo["expediente"]["trata"])
       self.setMotivoInterno(datosEEParseo["expediente"]["motivoInterno"])
       self.setMotivoExterno(datosEEParseo["expediente"]["motivoExterno"])
@@ -136,6 +158,14 @@
       if (datosEEParseo["expediente"]["ffcc"] != nil)
         self.setFFCC(datosEEParseo["expediente"]["ffcc"])
       end
+    end
+    # Métodos
+    # Todos los nombres de las imagenes que se contraponen con botones de EE se parametrizan via JSON
+    def parseJSONBotonerasEE()
+      archivoBotoneraEE = open("../JSON/botoneraExpediente.json")
+      botoneraEE = archivoBotoneraEE.read
+      botoneraEEParseo = JSON.parse(botoneraEE)
+      self.setBotoneraEEParseo(botoneraEEParseo)
     end
     # Completa los datos de la caratula variable
     def completarFFCC()
@@ -274,22 +304,102 @@
     end
     #
     def consultasPresionarTramitar()
-      botonera = self.getBrowser().spans(:class => 'z-label') 
+      botonera = self.getBrowser().spans(:class => 'z-label')
+      #botonConsulta = nil
       botonera.each do |boton|
         if (boton.title == "Tramitar Expediente")
+          #botonConsulta = boton
           boton.click
+          break
         end
       end
+      #botonConsulta.wait_while_present
     end
     #
     def tramitarEjecutarTarea()
-      consultasPresionarTramitar()
+      consultasPresionarTramitar()      
+      Watir::Wait.until { (self.getBrowser().lis(:class => 'z-menu-item')[8]).exists?}
       self.getBrowser().lis(:class => 'z-menu-item')[8].click
     end
     #
     def tramitarAdquirirTarea()
       consultasPresionarTramitar()
+      Watir::Wait.until { (self.getBrowser().lis(:class => 'z-menu-item')[9]).exists?}
       self.getBrowser().lis(:class => 'z-menu-item')[9].click
+    end    
+    # Realizar Pase manteniendo el mismo estado que posee actualmente el EE. Destino usuario:
+    def realizarPaseSinCambioEstadoDestinoUsuario(motivoPase)
+      self.parseJSONBotonerasEE()
+      botoneraEE = self.getBotoneraEEParseo()
+      self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'])
+      self.seleccionarDestinoUsuario()
+      #self.seleccionarDestinoSector()
+      self.cargarDestinoUsuario()
     end
+    # Realizar Pase manteniendo el mismo estado que posee actualmente el EE. Destino Reparticion-Sector:
+    def realizarPaseSinCambioEstadoDestinoSector(motivoPase)
+      self.parseJSONBotonerasEE()
+      botoneraEE = self.getBotoneraEEParseo()
+      self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'])
+      #
+      self.completarMotivoPase(motivoPase)
+      self.seleccionarDestinoSector()
+      self.cargarDestinoSector()
+    end
+    # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
+    def presionarBoton(nombreBoton)
+      #Obtener todas imagenes que sean botones
+      Watir::Wait.until { (self.getBrowser().div(:class => 'z-window-highlighted-cnt')).exists?}
+      botonesImagenes = self.getBrowser().div(:class => 'z-window-highlighted-cnt').images
+      botonesImagenes.each do |boton|
+        rutaImagenSplit = boton.src.split('/')
+        nombreImagen = rutaImagenSplit[rutaImagenSplit.length - 1]
+        #botoneraEE = self.getBotoneraEEParseo()
+        #
+        #if nombreImagen == botoneraEE['botonera']['transversal']['RealizarPase']
+        if nombreImagen == nombreBoton
+          boton.click
+        end
+      end
+    end
+    # 
+    def seleccionarDestinoUsuario()
+      #Watir::Wait.until { (self.getBrowser().spans(:class => 'z-radio')[2]).exists?}
+      self.getBrowser().spans(:class => 'z-radio')[2].click
+    end
+    # 
+    def seleccionarDestinoSector()
+      #Watir::Wait.until { (self.getBrowser().spans(:class => 'z-radio')[2]).exists?}
+      self.getBrowser().spans(:class => 'z-radio')[3].click
+    end
+    # 
+    def seleccionarDestinoMesaDeLaReparticion()
+      #Watir::Wait.until { (self.getBrowser().spans(:class => 'z-radio')[2]).exists?}
+      self.getBrowser().spans(:class => 'z-radio')[4].click
+    end
+    # 
+    def cargarDestinoUsuario()
+      
+    end
+    # 
+    def cargarDestinoSector()
+      # Levantar del JSON
+      datosExpediente = self.getDatosExpediente()
+      (self.getBrowser().text_fields(:class => 'z-bandbox-inp')[5]).set datosExpediente['expediente']['pase']['sectorDestino']['reparticion']
+      self.getBrowser().text_fields(:class => 'z-bandbox-inp')[5].fire_event :blur
+      (self.getBrowser().text_fields(:class => 'z-bandbox-inp')[6]).set datosExpediente['expediente']['pase']['sectorDestino']['sector']
+      self.getBrowser().text_fields(:class => 'z-bandbox-inp')[6].fire_event :blur
+      #expediente.getBrowser().text_field(:class => 'z-bandbox-inp')[5]
+    end
+    # 
+    def cargarDestinoMesaDeLaReparticion()
+      
+    end
+    # 
+    def completarMotivoPase(motivoPase)
+      # Completar el texto libre del documento GEDO
+      self.getBrowser().execute_script("$($('iframe').get(1)).contents().find('body').append('<p>#{motivoPase}</p>')")
+    end
+    #
   end
 ###############################################################################

@@ -6,6 +6,14 @@
     "descAdicional": "Descripción adicional",
     "ffcc": {
       "0": "198ABC"
+    },
+    "pase":{
+        "usuarioDestino": "CCARLOS",
+        "sectorDestino":{
+           "reparticion":"CHARLY",
+           "sector":"ALS"
+         },
+        "mesaDeLaReparticion": "CHARLY"
     }
   }
 }

@@ -20,8 +20,13 @@
   ##########
   expediente.consultaExpedientesPorNumeroSADE("2016", "00086369", "CHARLY")
   expediente.tramitarEjecutarTarea()
+  expediente.realizarPaseSinCambioEstadoDestinoSector('motivoPase')
+  ####
+  expediente.realizarPaseSinCambioEstadoDestinoUsuario('motivoPase')
+  
   ##########
   expediente.tramitarAdquirirTarea()
+
 
   imagenes = browser.images
   imagenes.each do |imagen|
@@ -46,7 +51,24 @@
 
       browser.lis(:class => 'z-menu-item')[8].click
 
+  expediente.parsearBotonesTramitarExpediente()
 
+######
+      botonesImagenes = self.getBrowser().div(:class => 'z-window-highlighted-cnt').images
+      botonesImagenes.each do |imagen|
+        rutaImagenSplit = imagen.src.split('/')
+        nombreImagen = rutaImagenSplit[rutaImagenSplit.length - 1]
+        botoneraEE = self.getBotoneraEEParseo()
+        #
+        if nombreImagen == botoneraEE['botonera']['transversal']['RealizarPase']
+            imagen.click
+          end
+        end
+######
+expediente.getBrowser().text_field(:class => 'z-bandbox-inp')[5]
+#####
+
+#$('.z-bandbox-inp').size
 
   browser.spans(:class => 'z-tab-text').find(browser.span(:class => 'z-tab-text').text == "Consultas")
   browser.spans(:class => 'z-button')[1].click()
