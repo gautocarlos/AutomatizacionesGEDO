@@ -345,6 +345,9 @@
       self.completarMotivoPase(motivoPase)
       self.seleccionarDestinoSector()
       self.cargarDestinoSector()
+      #
+      #self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'])
+      self.presionarBotonRealizarPase(botoneraEE['botonera']['transversal']['RealizarPase'])
     end
     # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
     def presionarBoton(nombreBoton)
@@ -357,9 +360,49 @@
         #botoneraEE = self.getBotoneraEEParseo()
         #
         #if nombreImagen == botoneraEE['botonera']['transversal']['RealizarPase']
-        if nombreImagen == nombreBoton
-          boton.click
+        #if (boton.visible?)
+        #    puts "------Usando EVAL Fuera del IF-------"
+        #    puts eval(boton.click).to_s
+        #    puts "------Usando EVAL Fuera del IF-------"
+        #end
+        #
+        if ((nombreImagen == nombreBoton) && (boton.visible?) && (boton.present?))
+          begin
+            #puts "------Usando EVAL-------"
+            #puts eval(boton.click)
+            #puts "------Usando EVAL-------"
+            #if (eval(boton.click) == nil)
+              #puts "Se podría dar click"              
+              boton.click
+              #puts "NombreImagen: #{nombreImagen}."
+            #end            
+            #puts "Se da click a NombreImagen: #{nombreImagen}."
+          #    puts "En el caso de intentar dar click en un elemento con el mismo nombre pero que no sea visble, se toma la Exception y se prosigue con el parseo."
+          rescue
+            puts "Hubo un error al dar click en el botón y/o el mismo no es visible."
+          end          
         end
+        #
+      end
+    end
+    # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
+    def presionarBotonRealizarPase(nombreBoton)
+      #Obtener todas imagenes que sean botones
+      Watir::Wait.until { (self.getBrowser().div(:class => 'z-window-highlighted-cnt')).exists?}
+      botonesImagenes = (self.getBrowser().divs(:class => 'z-window-highlighted-cnt'))[1].images
+      botonesImagenes.each do |boton|
+        rutaImagenSplit = boton.src.split('/')
+        nombreImagen = rutaImagenSplit[rutaImagenSplit.length - 1]
+        if ((nombreImagen == nombreBoton) && (boton.visible?) && (boton.present?))
+          begin
+              boton.click
+              puts "NombreImagen: #{nombreImagen}."
+              break
+          rescue
+            puts "Hubo un error al dar click en el botón y/o el mismo no es visible."
+          end          
+        end
+        #
       end
     end
     # 
@@ -389,7 +432,6 @@
       self.getBrowser().text_fields(:class => 'z-bandbox-inp')[5].fire_event :blur
       (self.getBrowser().text_fields(:class => 'z-bandbox-inp')[6]).set datosExpediente['expediente']['pase']['sectorDestino']['sector']
       self.getBrowser().text_fields(:class => 'z-bandbox-inp')[6].fire_event :blur
-      #expediente.getBrowser().text_field(:class => 'z-bandbox-inp')[5]
     end
     # 
     def cargarDestinoMesaDeLaReparticion()
@@ -397,8 +439,8 @@
     end
     # 
     def completarMotivoPase(motivoPase)
-      # Completar el texto libre del documento GEDO
-      self.getBrowser().execute_script("$($('iframe').get(1)).contents().find('body').append('<p>#{motivoPase}</p>')")
+      # Completar el motivo del Pase
+      self.getBrowser().execute_script("$($('iframe').get(1)).contents().find('body').find('iframe').contents().find('body').append('<p>#{motivoPase}</p>')")      
     end
     #
   end
