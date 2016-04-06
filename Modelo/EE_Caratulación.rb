@@ -19,6 +19,16 @@
   #expediente.caratularInterno()
   ##########
   expediente.consultaExpedientesPorNumeroSADE("2016", "00086369", "CHARLY")
+  expediente.tramitarAdquirirTareaEjecutar()
+  expediente.realizarPaseSinCambioEstadoDestinoMesaDeLaReparticion('motivoPase')
+  #
+  expediente.realizarPaseSinCambioEstadoDestinoUsuario('motivoPase')
+
+  #expediente.tramitarAdquirirTarea()
+  expediente.tramitarAdquirirTareaCerrar()  
+  #
+  expediente.realizarPaseSinCambioEstadoDestinoUsuario('motivoPase')
+  #
   expediente.tramitarEjecutarTarea()
   expediente.realizarPaseSinCambioEstadoDestinoSector('motivoPase')
   ####

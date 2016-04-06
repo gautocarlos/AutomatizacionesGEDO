@@ -37,6 +37,10 @@
       "GenerarCopia": "GenerarCopia.png",
       "NotificarExpedienteTAD": "NotificarExpedienteTAD.png",
       "Cancelar": "Cancelar.png"
-    }    
+    },
+    "botonesInternos": {
+      "Ejecutar": "Ejecutar.png",
+      "Cerrar": "Cerrar.png"
+    }
   }
 }
