@@ -21,14 +21,12 @@
       :datosExpediente
     # constructor
     def initialize(browser)
-      #@browser = browser
       self.setBrowser(browser)
-      #@acronimo = acronimo
       log = Logger.new('C:\CapturasWatir\Logs\Logs.txt') #DEBUG
       #@log = Logger.new("#{GEDORUTALOGS}#{GEDONOMBRELOG}")
       self.setLog(log)
-      #self.
       parseJSON()
+      self.parseJSONBotonerasEE()
     end
     # Getters
     def getDatosExpediente()
@@ -289,9 +287,11 @@
     #
     def cargarNumeroSADEExpedienteConsulta(anio, numero, reparticionUsuario)
       self.getBrowser().text_fields(:class => 'z-intbox')[0].set anio
+      self.getBrowser().text_fields(:class => 'z-intbox')[0].fire_event :blur
       self.getBrowser().text_fields(:class => 'z-intbox')[1].set numero
-      #self.getBrowser().text_fields(:class => 'z-bandbox-btn')[1].set numero
+      self.getBrowser().text_fields(:class => 'z-intbox')[1].fire_event :blur
       self.getBrowser().text_fields(:class => 'z-bandbox-inp')[0].set reparticionUsuario
+      self.getBrowser().text_fields(:class => 'z-bandbox-inp')[0].fire_event :blur
     end
     #
     def visualizarExpediente()
@@ -323,31 +323,52 @@
     end
     #
     def tramitarAdquirirTarea()
-      consultasPresionarTramitar()
+      self.consultasPresionarTramitar()
       Watir::Wait.until { (self.getBrowser().lis(:class => 'z-menu-item')[9]).exists?}
-      self.getBrowser().lis(:class => 'z-menu-item')[9].click
-    end    
+      botonAdquirir = self.getBrowser().lis(:class => 'z-menu-item')[9]
+      botonAdquirir.click
+      botonAdquirir.wait_while_present
+    end
+    #
+    def tramitarAdquirirTareaEjecutar()
+      #consultasPresionarTramitar()
+      #Watir::Wait.until { (self.getBrowser().lis(:class => 'z-menu-item')[9]).exists?}
+      #botonAdquirir = self.getBrowser().lis(:class => 'z-menu-item')[9]
+      #botonAdquirir.click
+      #botonAdquirir.wait_while_present
+      botoneraEE = self.getBotoneraEEParseo()
+      self.tramitarAdquirirTarea()
+      # FALTA UN WAIT, NO LLEGA A CARGAR EL BOTON POR ESO FALLA
+      boton = self.presionarBoton(botoneraEE['botonera']['botonesInternos']['Ejecutar'], 0)
+      boton.wait_while_present
+    end
     # Realizar Pase manteniendo el mismo estado que posee actualmente el EE. Destino usuario:
     def realizarPaseSinCambioEstadoDestinoUsuario(motivoPase)
-      self.parseJSONBotonerasEE()
+      #self.parseJSONBotonerasEE() # Ya se hace en el constructor
       botoneraEE = self.getBotoneraEEParseo()
-      self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'])
+      boton = self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 0)
+      #boton.wait_while_present
       self.seleccionarDestinoUsuario()
       #self.seleccionarDestinoSector()
       self.cargarDestinoUsuario()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 1)
     end
     # Realizar Pase manteniendo el mismo estado que posee actualmente el EE. Destino Reparticion-Sector:
     def realizarPaseSinCambioEstadoDestinoSector(motivoPase)
-      self.parseJSONBotonerasEE()
+      #self.parseJSONBotonerasEE() # Ya se hace en el constructor
       botoneraEE = self.getBotoneraEEParseo()
-      self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'])
-      #
-      self.completarMotivoPase(motivoPase)
+      boton = self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 0)
+      #Watir::Wait.until { !boton.present?}
+      #boton.wait_while_present      
       self.seleccionarDestinoSector()
       self.cargarDestinoSector()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
       #
       #self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'])
-      self.presionarBotonRealizarPase(botoneraEE['botonera']['transversal']['RealizarPase'])
+      self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 1)
     end
     # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
     def presionarBoton(nombreBoton)
@@ -357,46 +378,9 @@
       botonesImagenes.each do |boton|
         rutaImagenSplit = boton.src.split('/')
         nombreImagen = rutaImagenSplit[rutaImagenSplit.length - 1]
-        #botoneraEE = self.getBotoneraEEParseo()
-        #
-        #if nombreImagen == botoneraEE['botonera']['transversal']['RealizarPase']
-        #if (boton.visible?)
-        #    puts "------Usando EVAL Fuera del IF-------"
-        #    puts eval(boton.click).to_s
-        #    puts "------Usando EVAL Fuera del IF-------"
-        #end
-        #
-        if ((nombreImagen == nombreBoton) && (boton.visible?) && (boton.present?))
-          begin
-            #puts "------Usando EVAL-------"
-            #puts eval(boton.click)
-            #puts "------Usando EVAL-------"
-            #if (eval(boton.click) == nil)
-              #puts "Se podría dar click"              
-              boton.click
-              #puts "NombreImagen: #{nombreImagen}."
-            #end            
-            #puts "Se da click a NombreImagen: #{nombreImagen}."
-          #    puts "En el caso de intentar dar click en un elemento con el mismo nombre pero que no sea visble, se toma la Exception y se prosigue con el parseo."
-          rescue
-            puts "Hubo un error al dar click en el botón y/o el mismo no es visible."
-          end          
-        end
-        #
-      end
-    end
-    # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
-    def presionarBotonRealizarPase(nombreBoton)
-      #Obtener todas imagenes que sean botones
-      Watir::Wait.until { (self.getBrowser().div(:class => 'z-window-highlighted-cnt')).exists?}
-      botonesImagenes = (self.getBrowser().divs(:class => 'z-window-highlighted-cnt'))[1].images
-      botonesImagenes.each do |boton|
-        rutaImagenSplit = boton.src.split('/')
-        nombreImagen = rutaImagenSplit[rutaImagenSplit.length - 1]
         if ((nombreImagen == nombreBoton) && (boton.visible?) && (boton.present?))
           begin
               boton.click
-              puts "NombreImagen: #{nombreImagen}."
               break
           rescue
             puts "Hubo un error al dar click en el botón y/o el mismo no es visible."
@@ -405,19 +389,61 @@
         #
       end
     end
+    # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
+    #def presionarBotonRealizarPase(nombreBoton)
+      #Obtener todas imagenes que sean botones
+      #Watir::Wait.until { (self.getBrowser().div(:class => 'z-window-highlighted-cnt')).exists?}
+      #botonesImagenes = (self.getBrowser().divs(:class => 'z-window-highlighted-cnt'))[1].images
+      #botonesImagenes.each do |boton|
+        #rutaImagenSplit = boton.src.split('/')
+        #nombreImagen = rutaImagenSplit[rutaImagenSplit.length - 1]
+        #if ((nombreImagen == nombreBoton) && (boton.visible?) && (boton.present?))
+          #begin
+              #boton.click
+              #puts "NombreImagen: #{nombreImagen}."
+              #break
+          #rescue
+            #puts "Hubo un error al dar click en el botón y/o el mismo no es visible."
+          #end          
+        #end
+        #
+      #end
+    #end
     # 
+    # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
+    def presionarBoton(nombreBoton, indiceFrame)
+      #Obtener todas imagenes que sean botones
+      Watir::Wait.until { (self.getBrowser().div(:class => 'z-window-highlighted-cnt')).exists?}
+      botonesImagenes = (self.getBrowser().divs(:class => 'z-window-highlighted-cnt'))[indiceFrame].images
+      botonPresionado = nil
+      botonesImagenes.each do |boton|
+        rutaImagenSplit = boton.src.split('/')
+        nombreImagen = rutaImagenSplit[rutaImagenSplit.length - 1]
+        if ((nombreImagen == nombreBoton) && (boton.visible?) && (boton.present?))
+          begin
+              boton.click
+              botonPresionado = boton
+              break
+          rescue
+            puts "Hubo un error al dar click en el botón y/o el mismo no es visible."
+          end          
+        end
+        #
+      end
+      return botonPresionado
+    end
     def seleccionarDestinoUsuario()
-      #Watir::Wait.until { (self.getBrowser().spans(:class => 'z-radio')[2]).exists?}
+      Watir::Wait.until { (self.getBrowser().spans(:class => 'z-radio')[2]).exists?}
       self.getBrowser().spans(:class => 'z-radio')[2].click
     end
     # 
     def seleccionarDestinoSector()
-      #Watir::Wait.until { (self.getBrowser().spans(:class => 'z-radio')[2]).exists?}
+      Watir::Wait.until { (self.getBrowser().spans(:class => 'z-radio')[3]).exists?}
       self.getBrowser().spans(:class => 'z-radio')[3].click
     end
     # 
     def seleccionarDestinoMesaDeLaReparticion()
-      #Watir::Wait.until { (self.getBrowser().spans(:class => 'z-radio')[2]).exists?}
+      Watir::Wait.until { (self.getBrowser().spans(:class => 'z-radio')[4]).exists?}
       self.getBrowser().spans(:class => 'z-radio')[4].click
     end
     # 
