@@ -8,10 +8,10 @@
       "0": "198ABC"
     },
     "pase":{
-        "usuarioDestino": "CCARLOS",
+        "usuarioDestino": "Carlos Carlos",
         "sectorDestino":{
            "reparticion":"CHARLY",
-           "sector":"ALS"
+           "sector":"01"
          },
         "mesaDeLaReparticion": "CHARLY"
     }

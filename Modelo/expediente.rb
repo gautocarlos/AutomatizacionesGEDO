@@ -370,6 +370,21 @@
       #self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'])
       self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 1)
     end
+    # Realizar Pase manteniendo el mismo estado que posee actualmente el EE. Destino: Mesa de la repartición
+    def realizarPaseSinCambioEstadoDestinoMesaDeLaReparticion(motivoPase)
+      #self.parseJSONBotonerasEE() # Ya se hace en el constructor
+      botoneraEE = self.getBotoneraEEParseo()
+      boton = self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 0)
+      #Watir::Wait.until { !boton.present?}
+      #boton.wait_while_present      
+      self.seleccionarDestinoMesaDeLaReparticion()
+      self.cargarDestinoMesaDeLaReparticion()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      #
+      #self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'])
+      self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 1)
+    end
     # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
     def presionarBoton(nombreBoton)
       #Obtener todas imagenes que sean botones
@@ -448,7 +463,17 @@
     end
     # 
     def cargarDestinoUsuario()
-      
+      datosExpediente = self.getDatosExpediente()
+      (self.getBrowser().text_fields(:class => 'z-combobox-inp')[5]).set datosExpediente['expediente']['pase']['usuarioDestino']
+      #usuarios = self.getBrowser().tds(:class => 'z-comboitem-text')
+      #usuarios[usuarios.size - 1].click
+      # Uncluir un tiempo de espera para que no seleccione el combo de estados
+      #Watir::Wait.until { (self.getBrowser().text_fields(:class => 'z-combobox-inp')[5]).text == datosExpediente['expediente']['pase']['usuarioDestino'] }
+      sleep 2
+      self.getBrowser().execute_script("$('.z-comboitem-text').get($('.z-comboitem-text').size()-1).click()")
+      sleep 2
+      #self.getBrowser().text_fields(:class => 'z-combobox-inp')[5].fire_event :blur
+      #sleep 2
     end
     # 
     def cargarDestinoSector()
@@ -461,12 +486,26 @@
     end
     # 
     def cargarDestinoMesaDeLaReparticion()
-      
+      datosExpediente = self.getDatosExpediente()
+      (self.getBrowser().text_fields(:class => 'z-bandbox-inp')[7]).set datosExpediente['expediente']['pase']['mesaDeLaReparticion']
+      self.getBrowser().text_fields(:class => 'z-bandbox-inp')[7].fire_event :blur
     end
     # 
     def completarMotivoPase(motivoPase)
       # Completar el motivo del Pase
-      self.getBrowser().execute_script("$($('iframe').get(1)).contents().find('body').find('iframe').contents().find('body').append('<p>#{motivoPase}</p>')")      
+      scriptOld = "$($('iframe').get(1)).contents().find('body').find('iframe').contents().find('body').append('<p>#{motivoPase}</p>')"
+      scriptNew = "
+      marcos = $('iframe')
+      for (i = 0; i < marcos.size(); i++)
+      {
+        srcUnFrame = marcos.get(i).src
+        if ((srcUnFrame != null) && (srcUnFrame.contains('FCKeditor'))) {
+           console.log(srcUnFrame)
+           console.log(i)
+           $($('iframe').get(i)).contents().find('body').find('iframe').contents().find('body').append('<p>#{motivoPase}</p>')
+        }
+      };"      
+      self.getBrowser().execute_script(scriptNew)
     end
     #
   end
