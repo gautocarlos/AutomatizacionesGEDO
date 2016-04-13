@@ -20,16 +20,16 @@
   #expediente.paseDestinoIniciacion()
   #expediente.paseDestinoComunicacion()
   #expediente.paseDestinoTramitacion()
-  
+
   #expediente.caratularInterno()
   ##########
   expediente.consultaExpedientesPorNumeroSADE("2016", "00086369", "CHARLY")
   expediente.tramitarEjecutarTarea() # Funciona OK
   #
   #expediente.tramitarAdquirirTareaEjecutar() # OK
-  expediente.realizarPaseSinCambioEstadoDestinoUsuario('Pase automatizado')
+  #expediente.realizarPaseSinCambioEstadoDestinoUsuario('Pase automatizado')
   #expediente.realizarPaseSinCambioEstadoDestinoMesaDeLaReparticion('Pase automatizado')  # OK
-  #expediente.realizarPaseSinCambioEstadoDestinoSector('Pase automatizado') # OK
+  expediente.realizarPaseSinCambioEstadoDestinoSector('Pase automatizado') # OK
   
 
   #

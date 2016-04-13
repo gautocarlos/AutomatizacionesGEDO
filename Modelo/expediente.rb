@@ -298,7 +298,8 @@
     end
     #
     def presionarBotonBuscarExpediente()
-      self.getBrowser().spans(:class => 'z-button')[1].click()
+      #self.getBrowser().spans(:class => 'z-button')[1].click() # Dejó de funcionar sin razón aparente
+      self.getBrowser().tds(:class => 'z-button-cm')[1].click()
     end
     #
     def cargarNumeroSADEExpedienteConsulta(anio, numero, reparticionUsuario)
@@ -380,33 +381,21 @@
     end
     # Realizar Pase manteniendo el mismo estado que posee actualmente el EE. Destino Reparticion-Sector:
     def realizarPaseSinCambioEstadoDestinoSector(motivoPase)
-      #self.parseJSONBotonerasEE() # Ya se hace en el constructor
-      botoneraEE = self.getBotoneraEEParseo()
-      boton = self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 0)
-      #Watir::Wait.until { !boton.present?}
-      #boton.wait_while_present      
+      self.presionarRealizarPaseBotoneraTransversal()
       self.seleccionarDestinoSector()
       self.cargarDestinoSector()
       # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
       self.completarMotivoPase(motivoPase)
-      #
-      #self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'])
-      self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 1)
+      self.presionarRealizarPase()
     end
     # Realizar Pase manteniendo el mismo estado que posee actualmente el EE. Destino: Mesa de la repartición
     def realizarPaseSinCambioEstadoDestinoMesaDeLaReparticion(motivoPase)
-      #self.parseJSONBotonerasEE() # Ya se hace en el constructor
-      botoneraEE = self.getBotoneraEEParseo()
-      boton = self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 0)
-      #Watir::Wait.until { !boton.present?}
-      #boton.wait_while_present      
+      self.presionarRealizarPaseBotoneraTransversal()
       self.seleccionarDestinoMesaDeLaReparticion()
       self.cargarDestinoMesaDeLaReparticion()
       # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
       self.completarMotivoPase(motivoPase)
-      #
-      #self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'])
-      self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 1)
+      self.presionarRealizarPase()
     end
     # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
     def presionarBoton(nombreBoton)
@@ -502,6 +491,7 @@
     def cargarDestinoSector()
       # Levantar del JSON
       datosExpediente = self.getDatosExpediente()
+      sleep 2 # Agregar un wait que evalue si el campo está habilitado o no
       (self.getBrowser().text_fields(:class => 'z-bandbox-inp')[5]).set datosExpediente['expediente']['pase']['sectorDestino']['reparticion']
       self.getBrowser().text_fields(:class => 'z-bandbox-inp')[5].fire_event :blur
       (self.getBrowser().text_fields(:class => 'z-bandbox-inp')[6]).set datosExpediente['expediente']['pase']['sectorDestino']['sector']
