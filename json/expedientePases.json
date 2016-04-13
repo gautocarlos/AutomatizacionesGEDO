@@ -1,0 +1,32 @@
+{
+  "destinoEstados": {
+    "Iniciación": {
+      "Iniciación":"Iniciación",
+      "Subsanación":"Subsanación",
+      "Tramitación":"Tramitación",
+      "Guarda Temporal":"Guarda Temporal"
+    },
+    "Tramitación": {
+      "Comunicación":"Comunicación",
+      "Subsanación":"Subsanación",
+      "Tramitación":"Tramitación",
+      "Guarda Temporal":"Guarda Temporal"
+    },
+    "Comunicación": {
+      "Ejecución":"Ejecución",
+      "Comunicación":"Comunicación",
+      "Guarda Temporal":"Guarda Temporal"
+    },
+    "Ejecución": {
+      "Ejecución":"Ejecución",
+      "Subsanación":"Subsanación",
+      "Guarda Temporal":"Guarda Temporal"
+    },
+    "Subsanación": {
+      "Ejecución":"Ejecución",
+      "Subsanación":"Subsanación",
+      "Tramitación":"Tramitación",
+      "Guarda Temporal":"Guarda Temporal"
+    }
+  }
+}

@@ -1,3 +1,4 @@
+  #encoding: utf-8
   # Alta de documento GEDO
   #############################################################
   require 'watir-webdriver'
@@ -16,6 +17,9 @@
   browser = login.getBrowser()
 
   expediente = Expediente.new(browser)
+  expediente.paseDestinoTramitacion()
+  expediente.paseDestinoIniciacion()
+
   #expediente.caratularInterno()
   ##########
   expediente.consultaExpedientesPorNumeroSADE("2016", "00086369", "CHARLY")

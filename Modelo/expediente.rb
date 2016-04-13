@@ -19,6 +19,7 @@
       :reparticionUsuario
       :botoneraEEParseo
       :datosExpediente
+      :expedientePasesJSON
     # constructor
     def initialize(browser)
       self.setBrowser(browser)
@@ -29,6 +30,10 @@
       self.parseJSONBotonerasEE()
     end
     # Getters
+    def getExpedientePasesJSON()
+      return @expedientePasesJSON
+    end
+    #
     def getDatosExpediente()
       return @datosExpediente
     end
@@ -85,6 +90,10 @@
       return @botoneraEEParseo 
     end
     # Setters
+    def setExpedientePasesJSON(expedientePasesJSON)
+      @expedientePasesJSON = expedientePasesJSON
+    end
+    #
     def setDatosExpediente(datosExpediente)
       @datosExpediente = datosExpediente
     end
@@ -156,6 +165,13 @@
       if (datosEEParseo["expediente"]["ffcc"] != nil)
         self.setFFCC(datosEEParseo["expediente"]["ffcc"])
       end
+      # Se parsea el archivo con la información de los pases
+      archivoexpedientePases = open("../JSON/expedientePases.json")
+      expedientePasesJSON = archivoexpedientePases.read
+      expedientePasesJSONParse = JSON.parse(expedientePasesJSON)
+      # TO DO
+      # Se debe reemplazar esta implementación para que cada método acceda directo al contenido del JSON sin guardarlo en variables
+      self.setExpedientePasesJSON(expedientePasesJSONParse)
     end
     # Métodos
     # Todos los nombres de las imagenes que se contraponen con botones de EE se parametrizan via JSON
@@ -490,7 +506,7 @@
       (self.getBrowser().text_fields(:class => 'z-bandbox-inp')[7]).set datosExpediente['expediente']['pase']['mesaDeLaReparticion']
       self.getBrowser().text_fields(:class => 'z-bandbox-inp')[7].fire_event :blur
     end
-    # 
+    #
     def completarMotivoPase(motivoPase)
       # Completar el motivo del Pase
       scriptOld = "$($('iframe').get(1)).contents().find('body').find('iframe').contents().find('body').append('<p>#{motivoPase}</p>')"
@@ -507,6 +523,185 @@
       };"      
       self.getBrowser().execute_script(scriptNew)
     end
+    # Métodos para relizar un pase cambiando el destino
+    def paseDestinoIniciacion()
+      expedientePasesJSON = self.getExpedientePasesJSON()
+      #estado = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
+      #puts estado[3].value
+      #z-comboitem-text
+      indice = 0
+      #estadoIniciacion = expedientePasesJSON['destinoEstados']['Iniciación']['Iniciación']
+      estadoIniciacion = 'Iniciación'
+      existeEstado = false
+      #comboEstados = self.getBrowser().tds(:class => 'z-comboitem-text')
+      comboEstadoActual = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
+      comboEstadoActual.each do |estado|
+      #puts "Estado: #{indice} :  #{estado.value()} ::"
+        indice = indice + 1
+        if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estado.value() == estadoIniciacion))
+          # Hay que ver como validar los acentos
+          #puts "Estado dentro de IF: #{indice} :  #{estado.value()} ::"
+          existeEstado = true
+          break
+        end
+      end
+      if !(existeEstado)
+        puts "paseDestinoIniciacion() - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
+        return
+      end
+    end
     #
+    def paseDestinoTramitacion()
+      expedientePasesJSON = self.getExpedientePasesJSON()
+      #estado = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
+      #puts estado[3].value
+      #z-comboitem-text
+      indice = 0
+      #estadoIniciacion = expedientePasesJSON['destinoEstados']['Iniciación']['Iniciación']
+      estadoActual = 'Tramitación' # [Iniciación, Tramitación, Subsanación] Pueden pasar a Tramitación. AGREGAR VALIDACIÓN DE ESTOS ESTADOS
+      estadosValidos = self.estadosValidosPaseTramitacion() # ['Iniciación', 'Tramitación', 'Subsanación'] # Estados válidos para la transición
+      destinoPase = 'Tramitación'
+      existeEstado = false
+      comboEstado = nil #
+      #comboEstados = self.getBrowser().tds(:class => 'z-comboitem-text')
+      comboEstadoActual = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
+      comboEstadoActual.each do |estado|
+      #puts "Estado: #{indice} :  #{estado.value()} ::"
+        indice = indice + 1
+        #if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estado.value() == estadoActual))
+        if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estadosValidos.include?(estado.value())))
+          # Hay que ver como validar los acentos
+          #puts "Estado dentro de IF: #{indice} :  #{estado.value()} ::"
+          existeEstado = true
+          comboEstado = estado
+          break
+        end
+      end
+      if !(existeEstado)
+        puts "paseDestinoTramitacion() - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
+        return
+      end
+      # Existe el destino seleccionado
+      #self.seleccionarDestinoTramitacion(comboEstado)
+      self.seleccionarDestino(comboEstado, destinoPase)
+    end
+    #
+    def paseDestinoComunicacion()
+      
+    end
+    #
+    def paseDestinoEjecucion()
+      
+    end
+    #
+    def paseDestinoSubsanacion()
+      
+    end
+    #
+    def paseDestinoGuardaTemporal()
+      
+    end
+    #
+    #
+    def seleccionarDestino(comboEstado, destinoPase)
+      comboEstado.click()
+      estadoValido = validarDestino(destinoPase)
+      # Se selecciona el estado destino
+      if (estadoValido != nil)
+        estadoValido.click()
+      end
+      #
+    end
+    #
+    def validarDestino(destinoPase)
+      indice = 0
+      #estadoIniciacion = expedientePasesJSON['destinoEstados']['Iniciación']['Iniciación']
+      #estadoActual = 'Tramitación' # [Iniciación, Tramitación, Subsanación] Pueden pasar a Tramitación. AGREGAR VALIDACIÓN DE ESTOS ESTADOS
+      #estadosValidos = self.estadosValidosPaseTramitacion() # ['Iniciación', 'Tramitación', 'Subsanación'] # Estados válidos para la transición
+      #destinoPase = estadoDestino #'Tramitación'
+      existeEstado = false
+      estadoValido = nil
+      comboEstadoActual = self.getBrowser().tds(:class => 'z-comboitem-text')
+      #comboEstadoActual = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
+      comboEstadoActual.each do |estado|
+      #puts "Estado: #{indice} :  #{estado.value()} ::"
+        indice = indice + 1
+        #if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estado.value() == comboEstadoActual))
+        #puts "seleccionarDestinoTramitacion(comboEstado) - Estado dentro de IF: #{indice} :  #{estado.text()} ::"
+        if ((estado.visible?) && ((estado.text() != nil) || (estado.text() != '')) && (estado.text() == destinoPase))
+          # Hay que ver como validar los acentos
+          #puts "seleccionarDestinoTramitacion(comboEstado) - Estado dentro de IF: #{indice} :  #{estado.text()} ::"
+          existeEstado = true
+          estadoValido = estado
+          break
+        end
+      end
+      #puts "estadoValido :: #{estadoValido.text()} ::"
+      if !(existeEstado)
+        puts "seleccionarDestinoTramitacion(comboEstado) - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
+        return nil
+      end
+      return estadoValido
+    end
+    #
+    def seleccionarDestinoTramitacion(comboEstado)
+      comboEstado.click()
+      #
+      indice = 0
+      #estadoIniciacion = expedientePasesJSON['destinoEstados']['Iniciación']['Iniciación']
+      #estadoActual = 'Tramitación' # [Iniciación, Tramitación, Subsanación] Pueden pasar a Tramitación. AGREGAR VALIDACIÓN DE ESTOS ESTADOS
+      #estadosValidos = self.estadosValidosPaseTramitacion() # ['Iniciación', 'Tramitación', 'Subsanación'] # Estados válidos para la transición
+      destinoPase = 'Tramitación'
+      existeEstado = false
+      estadoValido = nil
+      comboEstadoActual = self.getBrowser().tds(:class => 'z-comboitem-text')
+      #comboEstadoActual = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
+      comboEstadoActual.each do |estado|
+      #puts "Estado: #{indice} :  #{estado.value()} ::"
+        indice = indice + 1
+        #if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estado.value() == comboEstadoActual))
+        #puts "seleccionarDestinoTramitacion(comboEstado) - Estado dentro de IF: #{indice} :  #{estado.text()} ::"
+        if ((estado.visible?) && ((estado.text() != nil) || (estado.text() != '')) && (estado.text() == destinoPase))
+          # Hay que ver como validar los acentos
+          #puts "seleccionarDestinoTramitacion(comboEstado) - Estado dentro de IF: #{indice} :  #{estado.text()} ::"
+          existeEstado = true
+          estadoValido = estado
+          break
+        end
+      end
+      #puts "estadoValido :: #{estadoValido.text()} ::"
+      if !(existeEstado)
+        puts "seleccionarDestinoTramitacion(comboEstado) - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
+        return
+      end
+      # Se selecciona el estado destino
+      estadoValido.click()
+      #
+    end
+    # Luego evaluar la posibilidad de quietar estos métodos con hardcode por JSON
+    def estadosValidosPaseInciacion()
+      estadosValidos = ['Iniciación']
+      return estadosValidos
+    end
+    #
+    def estadosValidosPaseTramitacion()
+      estadosValidos = ['Iniciación', 'Tramitación', 'Subsanación']
+      return estadosValidos
+    end
+    #
+    def estadosValidosPaseComunicacion()
+      estadosValidos = ['Tramitación', 'Comumicación']
+      return estadosValidos
+    end
+    #
+    def estadosValidosPaseEjecucion()
+      estadosValidos = ['Comumicación', 'Ejecución']
+      return estadosValidos
+    end
+    #
+    def estadosValidosPaseSubsanacion()
+      estadosValidos = ['Iniciación', 'Tramitación', 'Ejecución' , 'Subsanación']
+      return estadosValidos
+    end
   end
 ###############################################################################
