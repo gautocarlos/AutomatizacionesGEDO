@@ -564,19 +564,48 @@
     end
     #
     def paseDestinoComunicacion()
-      
+      destinoPase = 'Comunicación'
+      expedientePasesJSON = self.getExpedientePasesJSON()
+      estadosValidos = self.estadosValidosPaseComunicacion()
+      comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
+      if (comboEstado != nil)      
+        # Existe el destino seleccionado
+        self.seleccionarDestino(comboEstado, destinoPase)
+      end
     end
     #
     def paseDestinoEjecucion()
-      
+      destinoPase = 'Ejecución'
+      expedientePasesJSON = self.getExpedientePasesJSON()
+      estadosValidos = self.estadosValidosPaseEjecucion()
+      comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
+      if (comboEstado != nil)      
+        # Existe el destino seleccionado
+        self.seleccionarDestino(comboEstado, destinoPase)
+      end
     end
     #
     def paseDestinoSubsanacion()
-      
+      destinoPase = 'Subsanación'
+      expedientePasesJSON = self.getExpedientePasesJSON()
+      estadosValidos = self.estadosValidosPaseSubsanacion()
+      comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
+      if (comboEstado != nil)      
+        # Existe el destino seleccionado
+        self.seleccionarDestino(comboEstado, destinoPase)
+      end
+
     end
     #
     def paseDestinoGuardaTemporal()
-      
+      destinoPase = 'Guarda Temporal'
+      expedientePasesJSON = self.getExpedientePasesJSON()
+      estadosValidos = self.estadosValidosPaseGuardaTemporal()
+      comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
+      if (comboEstado != nil)      
+        # Existe el destino seleccionado
+        self.seleccionarDestino(comboEstado, destinoPase)
+      end
     end
     #
     def validarEstadoExpedienteParaPase(estadosValidos)
@@ -706,6 +735,11 @@
     #
     def estadosValidosPaseSubsanacion()
       estadosValidos = ['Iniciación', 'Tramitación', 'Ejecución' , 'Subsanación']
+      return estadosValidos
+    end
+    #
+    def estadosValidosPaseGuardaTemporal()
+      estadosValidos = ['Iniciación', 'Tramitación', 'Comunicación' , 'Ejecución' , 'Subsanación']
       return estadosValidos
     end
   end

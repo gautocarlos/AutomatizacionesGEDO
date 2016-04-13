@@ -17,8 +17,10 @@
   browser = login.getBrowser()
 
   expediente = Expediente.new(browser)
-  expediente.paseDestinoTramitacion()
   expediente.paseDestinoIniciacion()
+  expediente.paseDestinoComunicacion()
+  expediente.paseDestinoTramitacion()
+
 
   #expediente.caratularInterno()
   ##########
