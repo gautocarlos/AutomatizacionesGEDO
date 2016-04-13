@@ -550,40 +550,17 @@
         return
       end
     end
-    #
+    # Método principal de realización de pase a Tramitación
     def paseDestinoTramitacion()
-      expedientePasesJSON = self.getExpedientePasesJSON()
-      #estado = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
-      #puts estado[3].value
-      #z-comboitem-text
-      indice = 0
-      #estadoIniciacion = expedientePasesJSON['destinoEstados']['Iniciación']['Iniciación']
-      estadoActual = 'Tramitación' # [Iniciación, Tramitación, Subsanación] Pueden pasar a Tramitación. AGREGAR VALIDACIÓN DE ESTOS ESTADOS
-      estadosValidos = self.estadosValidosPaseTramitacion() # ['Iniciación', 'Tramitación', 'Subsanación'] # Estados válidos para la transición
       destinoPase = 'Tramitación'
-      existeEstado = false
-      comboEstado = nil #
-      #comboEstados = self.getBrowser().tds(:class => 'z-comboitem-text')
-      comboEstadoActual = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
-      comboEstadoActual.each do |estado|
-      #puts "Estado: #{indice} :  #{estado.value()} ::"
-        indice = indice + 1
-        #if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estado.value() == estadoActual))
-        if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estadosValidos.include?(estado.value())))
-          # Hay que ver como validar los acentos
-          #puts "Estado dentro de IF: #{indice} :  #{estado.value()} ::"
-          existeEstado = true
-          comboEstado = estado
-          break
-        end
+      expedientePasesJSON = self.getExpedientePasesJSON()
+      estadosValidos = self.estadosValidosPaseTramitacion()
+      comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
+      if (comboEstado != nil)      
+        # Existe el destino seleccionado
+        #self.seleccionarDestinoTramitacion(comboEstado)
+        self.seleccionarDestino(comboEstado, destinoPase)
       end
-      if !(existeEstado)
-        puts "paseDestinoTramitacion() - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
-        return
-      end
-      # Existe el destino seleccionado
-      #self.seleccionarDestinoTramitacion(comboEstado)
-      self.seleccionarDestino(comboEstado, destinoPase)
     end
     #
     def paseDestinoComunicacion()
@@ -602,18 +579,46 @@
       
     end
     #
+    def validarEstadoExpedienteParaPase(estadosValidos)
+      indice = 0
+      #estadoIniciacion = expedientePasesJSON['destinoEstados']['Iniciación']['Iniciación']
+      #estadoActual = 'Tramitación' # [Iniciación, Tramitación, Subsanación] Pueden pasar a Tramitación. AGREGAR VALIDACIÓN DE ESTOS ESTADOS
+      #estadosValidos = self.estadosValidosPaseTramitacion() # ['Iniciación', 'Tramitación', 'Subsanación'] # Estados válidos para la transición
+      #destinoPase = 'Tramitación'
+      existeEstado = false
+      comboEstado = nil #
+      #comboEstados = self.getBrowser().tds(:class => 'z-comboitem-text')
+      comboEstadoActual = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
+      comboEstadoActual.each do |estado|
+      #puts "Estado: #{indice} :  #{estado.value()} ::"
+        indice = indice + 1
+        #if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estado.value() == estadoActual))
+        if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estadosValidos.include?(estado.value())))
+          # Hay que ver como validar los acentos
+          #puts "Estado dentro de IF: #{indice} :  #{estado.value()} ::"
+          existeEstado = true
+          comboEstado = estado
+          break
+        end
+      end
+      if !(existeEstado)
+        puts "paseDestinoTramitacion() - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
+        return nil
+      end
+      return comboEstado
+    end
     #
     def seleccionarDestino(comboEstado, destinoPase)
       comboEstado.click()
-      estadoValido = validarDestino(destinoPase)
+      estadoValido = validarDestinoSeleccionado(destinoPase)
       # Se selecciona el estado destino
       if (estadoValido != nil)
         estadoValido.click()
       end
       #
     end
-    #
-    def validarDestino(destinoPase)
+    # Valida que el destino  exista para ser seleccionado
+    def validarDestinoSeleccionado(destinoPase)
       indice = 0
       #estadoIniciacion = expedientePasesJSON['destinoEstados']['Iniciación']['Iniciación']
       #estadoActual = 'Tramitación' # [Iniciación, Tramitación, Subsanación] Pueden pasar a Tramitación. AGREGAR VALIDACIÓN DE ESTOS ESTADOS
