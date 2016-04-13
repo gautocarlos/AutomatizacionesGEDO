@@ -358,18 +358,25 @@
       boton = self.presionarBoton(botoneraEE['botonera']['botonesInternos']['Ejecutar'], 0)
       boton.wait_while_present
     end
+    # Presiona el botón de realizar pase de la botonera transversal de la tramitación de expediente
+    def presionarRealizarPaseBotoneraTransversal()
+      botoneraEE = self.getBotoneraEEParseo()
+      boton = self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 0)      
+    end
+    # Presiona el botón de realizar pase de la pantalla propia de realizar pase
+    def presionarRealizarPase()
+      botoneraEE = self.getBotoneraEEParseo()
+      boton = self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 1)
+    end
+    #
     # Realizar Pase manteniendo el mismo estado que posee actualmente el EE. Destino usuario:
     def realizarPaseSinCambioEstadoDestinoUsuario(motivoPase)
-      #self.parseJSONBotonerasEE() # Ya se hace en el constructor
-      botoneraEE = self.getBotoneraEEParseo()
-      boton = self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 0)
-      #boton.wait_while_present
+      self.presionarRealizarPaseBotoneraTransversal()
       self.seleccionarDestinoUsuario()
-      #self.seleccionarDestinoSector()
       self.cargarDestinoUsuario()
       # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
       self.completarMotivoPase(motivoPase)
-      self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 1)
+      self.presionarRealizarPase()
     end
     # Realizar Pase manteniendo el mismo estado que posee actualmente el EE. Destino Reparticion-Sector:
     def realizarPaseSinCambioEstadoDestinoSector(motivoPase)

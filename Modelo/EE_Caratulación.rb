@@ -17,11 +17,10 @@
   browser = login.getBrowser()
 
   expediente = Expediente.new(browser)
-  expediente.paseDestinoIniciacion()
-  expediente.paseDestinoComunicacion()
-  expediente.paseDestinoTramitacion()
-
-
+  #expediente.paseDestinoIniciacion()
+  #expediente.paseDestinoComunicacion()
+  #expediente.paseDestinoTramitacion()
+  
   #expediente.caratularInterno()
   ##########
   expediente.consultaExpedientesPorNumeroSADE("2016", "00086369", "CHARLY")
