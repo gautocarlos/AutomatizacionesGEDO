@@ -18,6 +18,7 @@
 
   expediente = Expediente.new(browser)
   #expediente.paseDestinoIniciacion()
+
   #expediente.paseDestinoComunicacion()
   #expediente.paseDestinoTramitacion()
 
@@ -26,8 +27,17 @@
   expediente.consultaExpedientesPorNumeroSADE("2016", "00086369", "CHARLY")
   expediente.tramitarEjecutarTarea() # Funciona OK
   #
+  # NUEVOS MÉTODOS PARA REALIZAR PASES
+  #expediente.paseDestinoIniciacionDestinoUsuario('Pase automatizado') # OK
+  #expediente.paseDestinoIniciacionDestinoSector('Pase automatizado') # OK
+  #expediente.paseDestinoIniciacionDestinoMesaDeLaReparticion('Pase automatizado') # OK
+  expediente.paseDestinoTramitacionDestinoMesaDeLaReparticion('Pase automatizado') # OK
+  expediente.paseDestinoEjecucionDestinoMesaDeLaReparticion('Pase automatizado') # OK
+  expediente.paseDestinoSubsanacionDestinoMesaDeLaReparticion('Pase automatizado') # OK
+  expediente.paseDestinoComunicacionDestinoUsuario('Pase automatizado') # OK
+  #expediente.paseDestinoSubsanacionDestinoMesaDeLaReparticion('Pase automatizado') # OK
   #expediente.tramitarAdquirirTareaEjecutar() # OK
-  #expediente.realizarPaseSinCambioEstadoDestinoUsuario('Pase automatizado')
+  expediente.realizarPaseSinCambioEstadoDestinoUsuario('Pase automatizado') # OK
   #expediente.realizarPaseSinCambioEstadoDestinoMesaDeLaReparticion('Pase automatizado')  # OK
   expediente.realizarPaseSinCambioEstadoDestinoSector('Pase automatizado') # OK
   

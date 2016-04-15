@@ -299,7 +299,15 @@
     #
     def presionarBotonBuscarExpediente()
       #self.getBrowser().spans(:class => 'z-button')[1].click() # Dejó de funcionar sin razón aparente
-      self.getBrowser().tds(:class => 'z-button-cm')[1].click()
+      #self.getBrowser().tds(:class => 'z-button-cm')[1].click()
+      botonera = self.getBrowser().tds(:class => 'z-button-cm') 
+      botonera.each do |boton|
+        if (boton.text() == "Buscar")
+          boton.click
+          break
+        end
+      end
+
     end
     #
     def cargarNumeroSADEExpedienteConsulta(anio, numero, reparticionUsuario)
@@ -336,7 +344,9 @@
     def tramitarEjecutarTarea()
       consultasPresionarTramitar()      
       Watir::Wait.until { (self.getBrowser().lis(:class => 'z-menu-item')[8]).exists?}
-      self.getBrowser().lis(:class => 'z-menu-item')[8].click
+      botonEjecutar = self.getBrowser().lis(:class => 'z-menu-item')[8] #.click
+      botonEjecutar.click
+      botonEjecutar.wait_while_present
     end
     #
     def tramitarAdquirirTarea()
@@ -476,16 +486,27 @@
     # 
     def cargarDestinoUsuario()
       datosExpediente = self.getDatosExpediente()
-      (self.getBrowser().text_fields(:class => 'z-combobox-inp')[5]).set datosExpediente['expediente']['pase']['usuarioDestino']
-      #usuarios = self.getBrowser().tds(:class => 'z-comboitem-text')
-      #usuarios[usuarios.size - 1].click
-      # Uncluir un tiempo de espera para que no seleccione el combo de estados
-      #Watir::Wait.until { (self.getBrowser().text_fields(:class => 'z-combobox-inp')[5]).text == datosExpediente['expediente']['pase']['usuarioDestino'] }
+      # OJO: Que de un día para otro Cambió de posición y dejó de funcionar, hay que ver si se puede solucionar de manera genérica
+      #(self.getBrowser().text_fields(:class => 'z-combobox-inp')[5]).set datosExpediente['expediente']['pase']['usuarioDestino']
+      sleep 1
+      #(self.getBrowser().text_fields(:class => 'z-combobox-inp')[4]).set datosExpediente['expediente']['pase']['usuarioDestino']
+      campoUsuario = self.getBrowser().text_fields(:class => 'z-combobox-inp')
+      indice = 1
+      campoUsuario.each do |inputUsuario|
+        # puts "indice:: #{indice} ::"
+        if (inputUsuario.visible?)
+          begin
+            puts "indice:: #{indice} :: inputUsuario.visible"
+            inputUsuario.set datosExpediente['expediente']['pase']['usuarioDestino']
+            break
+            rescue 
+              puts "No se puede cargar el usuarioDestino en este input."
+          end          
+        end
+      end
       sleep 2
       self.getBrowser().execute_script("$('.z-comboitem-text').get($('.z-comboitem-text').size()-1).click()")
       sleep 2
-      #self.getBrowser().text_fields(:class => 'z-combobox-inp')[5].fire_event :blur
-      #sleep 2
     end
     # 
     def cargarDestinoSector()
@@ -500,8 +521,10 @@
     # 
     def cargarDestinoMesaDeLaReparticion()
       datosExpediente = self.getDatosExpediente()
-      (self.getBrowser().text_fields(:class => 'z-bandbox-inp')[7]).set datosExpediente['expediente']['pase']['mesaDeLaReparticion']
-      self.getBrowser().text_fields(:class => 'z-bandbox-inp')[7].fire_event :blur
+      posicion = (self.getBrowser().text_fields(:class => 'z-bandbox-inp')).size() - 2
+      sleep 1
+      (self.getBrowser().text_fields(:class => 'z-bandbox-inp')[posicion]).set datosExpediente['expediente']['pase']['mesaDeLaReparticion']
+      self.getBrowser().text_fields(:class => 'z-bandbox-inp')[posicion].fire_event :blur
     end
     #
     def completarMotivoPase(motivoPase)
@@ -521,7 +544,7 @@
       self.getBrowser().execute_script(scriptNew)
     end
     # Métodos para relizar un pase cambiando el destino
-    def paseDestinoIniciacion()
+    def paseDestinoIniciacion(obsoleto)
       expedientePasesJSON = self.getExpedientePasesJSON()
       #estado = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
       #puts estado[3].value
@@ -547,6 +570,22 @@
         return
       end
     end
+    #
+    def paseDestinoIniciacion()
+      destinoPase = 'Iniciación'
+      expedientePasesJSON = self.getExpedientePasesJSON()
+      estadosValidos = self.estadosValidosPaseTramitacion()
+      comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
+      if (comboEstado != nil)      
+        # Existe el destino seleccionado
+        #self.seleccionarDestinoTramitacion(comboEstado)
+        if (self.seleccionarDestino(comboEstado, destinoPase))
+          return true
+        end
+      end
+      return false
+    end
+    #
     # Método principal de realización de pase a Tramitación
     def paseDestinoTramitacion()
       destinoPase = 'Tramitación'
@@ -556,8 +595,11 @@
       if (comboEstado != nil)      
         # Existe el destino seleccionado
         #self.seleccionarDestinoTramitacion(comboEstado)
-        self.seleccionarDestino(comboEstado, destinoPase)
+        if (self.seleccionarDestino(comboEstado, destinoPase))
+          return true
+        end
       end
+      return false
     end
     #
     def paseDestinoComunicacion()
@@ -567,8 +609,11 @@
       comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
       if (comboEstado != nil)      
         # Existe el destino seleccionado
-        self.seleccionarDestino(comboEstado, destinoPase)
+        if (self.seleccionarDestino(comboEstado, destinoPase))
+          return true
+        end
       end
+      return false
     end
     #
     def paseDestinoEjecucion()
@@ -578,8 +623,11 @@
       comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
       if (comboEstado != nil)      
         # Existe el destino seleccionado
-        self.seleccionarDestino(comboEstado, destinoPase)
+        if (self.seleccionarDestino(comboEstado, destinoPase))
+          return true
+        end
       end
+      return false
     end
     #
     def paseDestinoSubsanacion()
@@ -589,9 +637,11 @@
       comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
       if (comboEstado != nil)      
         # Existe el destino seleccionado
-        self.seleccionarDestino(comboEstado, destinoPase)
+        if (self.seleccionarDestino(comboEstado, destinoPase))
+          return true
+        end
       end
-
+      return false
     end
     #
     def paseDestinoGuardaTemporal()
@@ -601,8 +651,11 @@
       comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
       if (comboEstado != nil)      
         # Existe el destino seleccionado
-        self.seleccionarDestino(comboEstado, destinoPase)
+        if (self.seleccionarDestino(comboEstado, destinoPase))
+          return true
+        end
       end
+      return false
     end
     #
     def validarEstadoExpedienteParaPase(estadosValidos)
@@ -640,7 +693,9 @@
       # Se selecciona el estado destino
       if (estadoValido != nil)
         estadoValido.click()
+        return true
       end
+      return false
       #
     end
     # Valida que el destino  exista para ser seleccionado
@@ -669,7 +724,7 @@
       end
       #puts "estadoValido :: #{estadoValido.text()} ::"
       if !(existeEstado)
-        puts "seleccionarDestinoTramitacion(comboEstado) - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
+        puts "validarDestinoSeleccionado(destinoPase) - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
         return nil
       end
       return estadoValido
@@ -703,12 +758,237 @@
       #puts "estadoValido :: #{estadoValido.text()} ::"
       if !(existeEstado)
         puts "seleccionarDestinoTramitacion(comboEstado) - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
-        return
+        return false
       end
       # Se selecciona el estado destino
       estadoValido.click()
+      return true
       #
     end
+    # NUEVA LÓGICA DE PASES CON CAMBIO DE ESTADO
+    #
+    # Estado destino: Inciación
+    #
+    def paseDestinoIniciacionDestinoUsuario(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoUsuario()
+      self.cargarDestinoUsuario()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoIniciacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    #
+    def paseDestinoIniciacionDestinoSector(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoSector()
+      self.cargarDestinoSector()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoIniciacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    # 
+    def paseDestinoIniciacionDestinoMesaDeLaReparticion(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoMesaDeLaReparticion()
+      self.cargarDestinoMesaDeLaReparticion()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoIniciacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    #
+    # Estado destino: Tramitación
+    #
+    def paseDestinoTramitacionDestinoUsuario(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoUsuario()
+      self.cargarDestinoUsuario()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoTramitacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    #
+    def paseDestinoTramitacionDestinoSector(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoSector()
+      self.cargarDestinoSector()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoTramitacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    #
+    def paseDestinoTramitacionDestinoMesaDeLaReparticion(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoMesaDeLaReparticion()
+      self.cargarDestinoMesaDeLaReparticion()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoTramitacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    #
+    # Estado destino: Comunicación
+    #
+    def paseDestinoComunicacionDestinoUsuario(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoUsuario()
+      self.cargarDestinoUsuario()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoComunicacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    #
+    def paseDestinoComunicacionDestinoSector(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoSector()
+      self.cargarDestinoSector()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoComunicacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    #
+    def paseDestinoComunicacionDestinoMesaDeLaReparticion(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoMesaDeLaReparticion()
+      self.cargarDestinoMesaDeLaReparticion()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoComunicacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    #
+    # Estado destino: Ejecución
+    #
+    # # Pase a usuario con estado Ejecución
+    def paseDestinoEjecucionDestinoUsuario(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoUsuario()
+      self.cargarDestinoUsuario()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoEjecucion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    # Pase a Sector de la repartición con estado Ejecución
+    def paseDestinoEjecucionDestinoSector(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoSector()
+      self.cargarDestinoSector()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoEjecucion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    # Pase a Mesa de la repartición con estado Ejecución
+    def paseDestinoEjecucionDestinoMesaDeLaReparticion(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoMesaDeLaReparticion()
+      self.cargarDestinoMesaDeLaReparticion()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoEjecucion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    #
+    # Estado destino: Subsanación
+    #
+    # Pase a usuario con estado subsanación
+    def paseDestinoSubsanacionDestinoUsuario(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoUsuario()
+      self.cargarDestinoUsuario()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoSubsanacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    # Pase a sector con estado subsanación
+    def paseDestinoSubsanacionDestinoSector(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoSector()
+      self.cargarDestinoSector()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoSubsanacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    # Pase a Mesa de la repartición con estado subsanación
+    def paseDestinoSubsanacionDestinoMesaDeLaReparticion(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      self.seleccionarDestinoMesaDeLaReparticion()
+      self.cargarDestinoMesaDeLaReparticion()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoSubsanacion())
+        self.presionarRealizarPase()
+      else
+        return false
+      end
+      return true
+    end
+    #
     # Luego evaluar la posibilidad de quietar estos métodos con hardcode por JSON
     def estadosValidosPaseInciacion()
       estadosValidos = ['Iniciación']
@@ -721,12 +1001,12 @@
     end
     #
     def estadosValidosPaseComunicacion()
-      estadosValidos = ['Tramitación', 'Comumicación']
+      estadosValidos = ['Tramitación', 'Comunicación']
       return estadosValidos
     end
     #
     def estadosValidosPaseEjecucion()
-      estadosValidos = ['Comumicación', 'Ejecución']
+      estadosValidos = ['Comunicación', 'Ejecución']
       return estadosValidos
     end
     #
