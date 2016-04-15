@@ -190,10 +190,7 @@
         indice = indice + 1
         if (i.visible? && !i.readonly?)
           if indice > 0
-            #i.set TEXTOCAMPOSFC
-            #puts "0---------------"
             i.set self.getFFCC()[indiceFFCC.to_s]
-            #puts "1---------------"
             indiceFFCC = indiceFFCC + 1
           end
           i.fire_event :blur
@@ -206,16 +203,9 @@
       self.iniciarCaratulacionInterna()
       self.completarDatosGenericos()
       self.caratular()
-      #self.getBrowser().text_field(:class => 'z-bandbox-inp').wait_while_present
-      #self.getBrowser().div(:class => 'z-loading-indicator').wait_while_present
-      #Watir::Wait.until { self.getBrowser().element(:class => 'z-button-cm').exists?}
       if(self.tieneCaratulaVariable())
         self.completarCV()
       end
-      #
-      #if (self.getBrowser().fieldset(:class => 'z-fieldset').exists?)
-        #puts "------------- Tiene caratula variable, Completar -------------"
-      #end
       self.terminarCaratulacion()
     end
     # Realiza una caratulación interna de expediente
@@ -248,27 +238,20 @@
     end
     #
     def caratular()
-      # Caratular
-      #self.getBrowser().execute_script("($('.z-toolbarbutton').get(3)).click()")
-      #puts "----caratular()----"
       self.getBrowser().divs(:class => 'z-toolbarbutton')[3].click
       self.getBrowser().divs(:class => 'z-toolbarbutton')[3].wait_while_present
     end
     def tieneCaratulaVariable()
-      #puts "tieneCaratulaVariable"
       return (self.getBrowser().fieldset(:class => 'z-fieldset').exists?)
     end
     #
     def completarCV()
         self.completarFFCC()
-        #puts "----completarFFCC()----"
         self.getBrowser().element(:class => 'z-button-cm').click
-        #self.getBrowser().element(:class => 'z-button-cm').wait_while_present
         self.getBrowser().fieldset(:class => 'z-fieldset').wait_while_present
     end
     #
     def terminarCaratulacion()
-      #puts "----terminarCaratulacion()----"
       self.getBrowser().element(:class => 'z-button-cm').click
     end
     # Deprecar?
@@ -366,18 +349,18 @@
       botoneraEE = self.getBotoneraEEParseo()
       self.tramitarAdquirirTarea()
       # FALTA UN WAIT, NO LLEGA A CARGAR EL BOTON POR ESO FALLA
-      boton = self.presionarBoton(botoneraEE['botonera']['botonesInternos']['Ejecutar'], 0)
+      boton = self.presionarBotonImagen(botoneraEE['botonera']['botonesInternos']['Ejecutar'], 0)
       boton.wait_while_present
     end
     # Presiona el botón de realizar pase de la botonera transversal de la tramitación de expediente
     def presionarRealizarPaseBotoneraTransversal()
       botoneraEE = self.getBotoneraEEParseo()
-      boton = self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 0)      
+      boton = self.presionarBotonImagen(botoneraEE['botonera']['transversal']['RealizarPase'], 0)      
     end
     # Presiona el botón de realizar pase de la pantalla propia de realizar pase
     def presionarRealizarPase()
       botoneraEE = self.getBotoneraEEParseo()
-      boton = self.presionarBoton(botoneraEE['botonera']['transversal']['RealizarPase'], 1)
+      boton = self.presionarBotonImagen(botoneraEE['botonera']['transversal']['RealizarPase'], 1)
     end
     #
     # Realizar Pase manteniendo el mismo estado que posee actualmente el EE. Destino usuario:
@@ -408,7 +391,7 @@
       self.presionarRealizarPase()
     end
     # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
-    def presionarBoton(nombreBoton)
+    def presionarBotonImagen(nombreBoton)
       #Obtener todas imagenes que sean botones
       Watir::Wait.until { (self.getBrowser().div(:class => 'z-window-highlighted-cnt')).exists?}
       botonesImagenes = self.getBrowser().div(:class => 'z-window-highlighted-cnt').images
@@ -427,28 +410,20 @@
       end
     end
     # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
-    #def presionarBotonRealizarPase(nombreBoton)
-      #Obtener todas imagenes que sean botones
-      #Watir::Wait.until { (self.getBrowser().div(:class => 'z-window-highlighted-cnt')).exists?}
-      #botonesImagenes = (self.getBrowser().divs(:class => 'z-window-highlighted-cnt'))[1].images
-      #botonesImagenes.each do |boton|
-        #rutaImagenSplit = boton.src.split('/')
-        #nombreImagen = rutaImagenSplit[rutaImagenSplit.length - 1]
-        #if ((nombreImagen == nombreBoton) && (boton.visible?) && (boton.present?))
-          #begin
-              #boton.click
-              #puts "NombreImagen: #{nombreImagen}."
-              #break
-          #rescue
-            #puts "Hubo un error al dar click en el botón y/o el mismo no es visible."
-          #end          
-        #end
-        #
-      #end
-    #end
-    # 
+    def presionarBotonTD(textoBoton, clase)
+      # Redefinir la variable clase para recibir por parámetro la clase del componente a presionar click
+      #clase = 'z-button-cm'
+      botonera = self.getBrowser().tds(:class => clase)
+      botonera.each do |boton|
+        if (boton.text() == textoBoton)
+          boton.click
+          break
+        end
+      end
+      #botonConsulta.wait_while_present
+    end
     # Se parsean todos las imagenes que derivan en botones de la pantalla de tramitar expediente
-    def presionarBoton(nombreBoton, indiceFrame)
+    def presionarBotonImagen(nombreBoton, indiceFrame)
       #Obtener todas imagenes que sean botones
       Watir::Wait.until { (self.getBrowser().div(:class => 'z-window-highlighted-cnt')).exists?}
       botonesImagenes = (self.getBrowser().divs(:class => 'z-window-highlighted-cnt'))[indiceFrame].images
@@ -486,17 +461,13 @@
     # 
     def cargarDestinoUsuario()
       datosExpediente = self.getDatosExpediente()
-      # OJO: Que de un día para otro Cambió de posición y dejó de funcionar, hay que ver si se puede solucionar de manera genérica
-      #(self.getBrowser().text_fields(:class => 'z-combobox-inp')[5]).set datosExpediente['expediente']['pase']['usuarioDestino']
       sleep 1
-      #(self.getBrowser().text_fields(:class => 'z-combobox-inp')[4]).set datosExpediente['expediente']['pase']['usuarioDestino']
       campoUsuario = self.getBrowser().text_fields(:class => 'z-combobox-inp')
       indice = 1
       campoUsuario.each do |inputUsuario|
-        # puts "indice:: #{indice} ::"
         if (inputUsuario.visible?)
           begin
-            puts "indice:: #{indice} :: inputUsuario.visible"
+            #puts "indice:: #{indice} :: inputUsuario.visible"
             inputUsuario.set datosExpediente['expediente']['pase']['usuarioDestino']
             break
             rescue 
@@ -546,26 +517,19 @@
     # Métodos para relizar un pase cambiando el destino
     def paseDestinoIniciacion(obsoleto)
       expedientePasesJSON = self.getExpedientePasesJSON()
-      #estado = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
-      #puts estado[3].value
-      #z-comboitem-text
       indice = 0
-      #estadoIniciacion = expedientePasesJSON['destinoEstados']['Iniciación']['Iniciación']
       estadoIniciacion = 'Iniciación'
       existeEstado = false
-      #comboEstados = self.getBrowser().tds(:class => 'z-comboitem-text')
       comboEstadoActual = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
       comboEstadoActual.each do |estado|
-      #puts "Estado: #{indice} :  #{estado.value()} ::"
         indice = indice + 1
         if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estado.value() == estadoIniciacion))
-          # Hay que ver como validar los acentos
-          #puts "Estado dentro de IF: #{indice} :  #{estado.value()} ::"
           existeEstado = true
           break
         end
       end
       if !(existeEstado)
+        # Implementar raise
         puts "paseDestinoIniciacion() - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
         return
       end
@@ -574,7 +538,7 @@
     def paseDestinoIniciacion()
       destinoPase = 'Iniciación'
       expedientePasesJSON = self.getExpedientePasesJSON()
-      estadosValidos = self.estadosValidosPaseTramitacion()
+      estadosValidos = self.estadosValidosPaseInciacion()
       comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
       if (comboEstado != nil)      
         # Existe el destino seleccionado
@@ -649,8 +613,10 @@
       expedientePasesJSON = self.getExpedientePasesJSON()
       estadosValidos = self.estadosValidosPaseGuardaTemporal()
       comboEstado = self.validarEstadoExpedienteParaPase(estadosValidos)
-      if (comboEstado != nil)      
+      #puts ":: paseDestinoGuardaTemporal() ::  (comboEstado != nil) ::"
+      if (comboEstado != nil)
         # Existe el destino seleccionado
+        #puts ":: paseDestinoGuardaTemporal() ::  (comboEstado != nil) ::"
         if (self.seleccionarDestino(comboEstado, destinoPase))
           return true
         end
@@ -669,27 +635,29 @@
       #comboEstados = self.getBrowser().tds(:class => 'z-comboitem-text')
       comboEstadoActual = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
       comboEstadoActual.each do |estado|
-      #puts "Estado: #{indice} :  #{estado.value()} ::"
+        #puts "Estado: #{indice} :  #{estado.value()} ::"
         indice = indice + 1
         #if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estado.value() == estadoActual))
         if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estadosValidos.include?(estado.value())))
           # Hay que ver como validar los acentos
-          #puts "Estado dentro de IF: #{indice} :  #{estado.value()} ::"
+          #puts ":: validarEstadoExpedienteParaPase(estadosValidos) ::Estado dentro de IF: #{indice} :  #{estado.value()} ::"
           existeEstado = true
           comboEstado = estado
           break
         end
       end
       if !(existeEstado)
-        puts "paseDestinoTramitacion() - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
+        puts "validarEstadoExpedienteParaPase() - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
         return nil
       end
       return comboEstado
     end
     #
     def seleccionarDestino(comboEstado, destinoPase)
+      #puts ":: seleccionarDestino(destinoPase) :: #{destinoPase} ::"
       comboEstado.click()
-      estadoValido = validarDestinoSeleccionado(destinoPase)
+      sleep 1
+      estadoValido = self.validarDestinoSeleccionado(destinoPase)
       # Se selecciona el estado destino
       if (estadoValido != nil)
         estadoValido.click()
@@ -701,30 +669,19 @@
     # Valida que el destino  exista para ser seleccionado
     def validarDestinoSeleccionado(destinoPase)
       indice = 0
-      #estadoIniciacion = expedientePasesJSON['destinoEstados']['Iniciación']['Iniciación']
-      #estadoActual = 'Tramitación' # [Iniciación, Tramitación, Subsanación] Pueden pasar a Tramitación. AGREGAR VALIDACIÓN DE ESTOS ESTADOS
-      #estadosValidos = self.estadosValidosPaseTramitacion() # ['Iniciación', 'Tramitación', 'Subsanación'] # Estados válidos para la transición
-      #destinoPase = estadoDestino #'Tramitación'
       existeEstado = false
       estadoValido = nil
       comboEstadoActual = self.getBrowser().tds(:class => 'z-comboitem-text')
-      #comboEstadoActual = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
       comboEstadoActual.each do |estado|
-      #puts "Estado: #{indice} :  #{estado.value()} ::"
         indice = indice + 1
-        #if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estado.value() == comboEstadoActual))
-        #puts "seleccionarDestinoTramitacion(comboEstado) - Estado dentro de IF: #{indice} :  #{estado.text()} ::"
         if ((estado.visible?) && ((estado.text() != nil) || (estado.text() != '')) && (estado.text() == destinoPase))
-          # Hay que ver como validar los acentos
-          #puts "seleccionarDestinoTramitacion(comboEstado) - Estado dentro de IF: #{indice} :  #{estado.text()} ::"
           existeEstado = true
           estadoValido = estado
           break
         end
       end
-      #puts "estadoValido :: #{estadoValido.text()} ::"
       if !(existeEstado)
-        puts "validarDestinoSeleccionado(destinoPase) - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
+        puts "validarDestinoSeleccionado(#{destinoPase}) - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
         return nil
       end
       return estadoValido
@@ -734,28 +691,18 @@
       comboEstado.click()
       #
       indice = 0
-      #estadoIniciacion = expedientePasesJSON['destinoEstados']['Iniciación']['Iniciación']
-      #estadoActual = 'Tramitación' # [Iniciación, Tramitación, Subsanación] Pueden pasar a Tramitación. AGREGAR VALIDACIÓN DE ESTOS ESTADOS
-      #estadosValidos = self.estadosValidosPaseTramitacion() # ['Iniciación', 'Tramitación', 'Subsanación'] # Estados válidos para la transición
       destinoPase = 'Tramitación'
       existeEstado = false
       estadoValido = nil
       comboEstadoActual = self.getBrowser().tds(:class => 'z-comboitem-text')
-      #comboEstadoActual = self.getBrowser().text_fields(:class => 'z-combobox-inp z-combobox-readonly')
       comboEstadoActual.each do |estado|
-      #puts "Estado: #{indice} :  #{estado.value()} ::"
         indice = indice + 1
-        #if ((estado.visible?) && ((estado.value() != nil) || (estado.value() != '')) && (estado.value() == comboEstadoActual))
-        #puts "seleccionarDestinoTramitacion(comboEstado) - Estado dentro de IF: #{indice} :  #{estado.text()} ::"
         if ((estado.visible?) && ((estado.text() != nil) || (estado.text() != '')) && (estado.text() == destinoPase))
-          # Hay que ver como validar los acentos
-          #puts "seleccionarDestinoTramitacion(comboEstado) - Estado dentro de IF: #{indice} :  #{estado.text()} ::"
           existeEstado = true
           estadoValido = estado
           break
         end
       end
-      #puts "estadoValido :: #{estadoValido.text()} ::"
       if !(existeEstado)
         puts "seleccionarDestinoTramitacion(comboEstado) - ERROR NO EXISTE EL ESTADO SELECCIONADO COMO DESTINO DE PASE."
         return false
@@ -989,6 +936,23 @@
       return true
     end
     #
+    # Pase a Guarda Temporal
+    def paseDestinoGuardaTemporalFinal(motivoPase)
+      self.presionarRealizarPaseBotoneraTransversal()
+      # Por los tiempos de carga del popup se realiza primero la selección de destino y luego se compelta el motivo de pase.
+      sleep 1
+      self.completarMotivoPase(motivoPase)
+      if (self.paseDestinoGuardaTemporal())
+        self.presionarRealizarPase()
+        # Click en el cartel de aviso
+        self.presionarBotonTD('Si','z-button-cm')
+      else
+        return false
+      end
+      return true
+    end
+    #
+
     # Luego evaluar la posibilidad de quietar estos métodos con hardcode por JSON
     def estadosValidosPaseInciacion()
       estadosValidos = ['Iniciación']

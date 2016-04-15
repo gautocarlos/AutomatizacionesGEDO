@@ -21,10 +21,10 @@
 
   #expediente.paseDestinoComunicacion()
   #expediente.paseDestinoTramitacion()
-
+  expediente.paseDestinoGuardaTemporalFinal('Pase automatizado')
   #expediente.caratularInterno()
   ##########
-  expediente.consultaExpedientesPorNumeroSADE("2016", "00086369", "CHARLY")
+  expediente.consultaExpedientesPorNumeroSADE("2016", "00090646", "CHARLY")
   expediente.tramitarEjecutarTarea() # Funciona OK
   #
   # NUEVOS MÉTODOS PARA REALIZAR PASES
