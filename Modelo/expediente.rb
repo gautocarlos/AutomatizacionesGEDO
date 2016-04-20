@@ -2,6 +2,7 @@
   require 'watir-webdriver'
   require 'logger'
   require 'json'
+  require 'Matrix'
   require '../constantes.rb'
   class Expediente
     attr_accessor
@@ -982,6 +983,67 @@
     def estadosValidosPaseGuardaTemporal()
       estadosValidos = ['Iniciación', 'Tramitación', 'Comunicación' , 'Ejecución' , 'Subsanación']
       return estadosValidos
+    end
+    # VINCULACIÓN DE DOCUMENTOS A UN EXPEDIENTE
+    # Se utiliza para vincular documentos GEDO a un Expediente
+    def vincularDocumentoPorNumeroSADE()
+      botoneraEE = self.getBotoneraEEParseo()
+      datosExpediente = self.getDatosExpediente()
+      documentosParaVincular = datosExpediente['expediente']['documentos']
+      #puts documentosParaVincular
+      parseGEDOSADE = self.parseGEDOSADE(documentosParaVincular)
+      #indice = 0
+      parseGEDOSADE.each do |documento|
+        # Número SADE
+        self.cargarNumeracionSADE(documento)
+        boton = self.presionarBotonImagen(botoneraEE['botonera']['tabDocumento']['VincularDocumento'], 0)
+        sleep 1
+        #indice = indice + 1
+      end      
+      #boton = self.presionarBotonImagen(botoneraEE['botonera']['tabDocumento']['VincularDocumento'], 0)
+      #boton.wait_while_present
+    end
+    #
+    def cargarTipoSADE(documento)
+      #self.getBrowser().text_fields(:class => 'z-bandbox-btn')[0].click # Bandbox tipo
+      self.getBrowser().text_fields(:class => 'z-bandbox-inp')[0].set documento[0] # Tipo
+      self.getBrowser().text_fields(:class => 'z-bandbox-inp')[0].fire_event :blur
+    end
+    #
+    def cargarAnioSADE(documento)
+      self.getBrowser().text_fields(:class => 'z-intbox')[0].set documento[1] # Año
+      self.getBrowser().text_fields(:class => 'z-intbox')[0].fire_event :blur
+    end
+    #
+    def cargarNumeroSADE(documento)
+      self.getBrowser().text_fields(:class => 'z-intbox')[1].set documento[2] # Número
+      self.getBrowser().text_fields(:class => 'z-intbox')[1].fire_event :blur
+    end
+    #
+    def cargarReparticionSADE(documento)
+      self.getBrowser().text_fields(:class => 'z-bandbox-inp')[1].set documento[4] # Repartición
+      self.getBrowser().text_fields(:class => 'z-bandbox-inp')[1].fire_event :blur
+    end
+    #
+    def cargarNumeracionSADE(documento)
+      self.cargarTipoSADE(documento)
+      self.cargarAnioSADE(documento)
+      self.cargarNumeroSADE(documento)
+      self.cargarReparticionSADE(documento)
+    end    
+    # Se parsean los documentos GEDO para dividir en los distintos campos:
+    # Ejemplo: "numeroSADE": "IF-2016-00009614-   -DGAYDRH"
+    # Se divide en: 'IF', '2016', '00009614','   ', 'DGAYDRH'
+    def parseGEDOSADE(documentosParaVincular)
+      arrayDocumentosParaVincularSplit = []
+      listaDocumentosParaVincular = documentosParaVincular['numeroSADE']
+      indice = 0
+      listaDocumentosParaVincular.each do |documento|
+        documentoSplit = documento.split('-')
+        arrayDocumentosParaVincularSplit[indice] = documentoSplit
+        indice = indice + 1
+      end
+      return arrayDocumentosParaVincularSplit
     end
   end
 ###############################################################################

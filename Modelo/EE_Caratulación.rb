@@ -17,6 +17,7 @@
   browser = login.getBrowser()
 
   expediente = Expediente.new(browser)
+  expediente.vincularDocumentoPorNumeroSADE()
   #expediente.paseDestinoIniciacion()
 
   #expediente.paseDestinoComunicacion()
